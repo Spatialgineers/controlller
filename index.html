@@ -587,25 +587,52 @@
             const statusText = document.getElementById('remote-status');
             const setupSec = document.getElementById('setup-section');
             const activeSec = document.getElementById('active-section');
+            const btnActivar = document.getElementById('btn-activar');
+            const btnSoloManual = document.getElementById('btn-solo-manual');
             let lastOri = { a:0, b:0, c:0 };
 
-            document.getElementById('btn-activar').addEventListener('click', (e) => {
-                e.target.innerText = "SOLICITANDO...";
+            btnActivar.addEventListener('click', (e) => {
+                btnActivar.innerText = "SOLICITANDO PERMISOS...";
+                btnActivar.disabled = true;
+                btnSoloManual.disabled = true;
                 if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
                     DeviceOrientationEvent.requestPermission()
                         .then(state => { state === 'granted' ? initRemote(true) : initRemote(false); })
                         .catch(err => initRemote(false));
                 } else { initRemote(true); }
             });
-            document.getElementById('btn-solo-manual').addEventListener('click', () => initRemote(false));
+            
+            btnSoloManual.addEventListener('click', () => {
+                btnSoloManual.innerText = "INICIANDO MODO MANUAL...";
+                btnActivar.disabled = true;
+                btnSoloManual.disabled = true;
+                initRemote(false);
+            });
 
             function initRemote(useGyro) {
                 statusText.innerText = "ESTABLECIENDO ENLACE P2P...";
+                btnActivar.innerText = "CONECTANDO AL HOST...";
+                btnSoloManual.innerText = "CONECTANDO AL HOST...";
+                
                 peer = new Peer({ debug: 1 });
                 
+                // Timeout de seguridad por si el Wi-Fi bloquea la conexión P2P
+                let connectionTimeout = setTimeout(() => {
+                    if (!dataConnection || !dataConnection.open) {
+                        alert("La conexión está tardando demasiado. Por favor, recarga la página o intenta usar datos móviles (LTE/5G).");
+                        btnActivar.innerText = "ACTIVAR GIROSCOPIO 3D";
+                        btnSoloManual.innerText = "USAR SOLO BOTONES (D-PAD)";
+                        btnActivar.disabled = false;
+                        btnSoloManual.disabled = false;
+                    }
+                }, 10000);
+
                 peer.on('open', () => {
-                    dataConnection = peer.connect(hostId, { reliable: false });
+                    // Eliminamos reliable: false para evitar bloqueos del Data Channel en iOS
+                    dataConnection = peer.connect(hostId);
+                    
                     dataConnection.on('open', () => {
+                        clearTimeout(connectionTimeout); // Cancelar el timeout de error
                         setupSec.style.display = 'none'; activeSec.style.display = 'flex';
                         statusText.innerText = "SISTEMA EN LÍNEA"; statusText.classList.add('text-green-500');
                         
@@ -641,6 +668,10 @@
                 };
                 b.addEventListener('touchstart', (e)=>{e.preventDefault(); s(true);});
                 b.addEventListener('touchend', (e)=>{e.preventDefault(); s(false);});
+                // Soporte para PC/Mouse
+                b.addEventListener('mousedown', (e)=>{e.preventDefault(); s(true);});
+                b.addEventListener('mouseup', (e)=>{e.preventDefault(); s(false);});
+                b.addEventListener('mouseleave', (e)=>{e.preventDefault(); s(false);});
             };
             sRBtn('ctrl-btn-up', 'up'); sRBtn('ctrl-btn-down', 'down');
             sRBtn('ctrl-btn-left', 'left'); sRBtn('ctrl-btn-right', 'right');
