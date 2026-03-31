@@ -54,7 +54,8 @@
             backdrop-filter: blur(12px);
             border: 1px solid rgba(50, 82, 123, 0.5);
             border-left: 4px solid #FDCC0D;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(50, 82, 123, 0.2);
+            border-radius: 1.5rem; /* Esquinas más curvas */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), inset 0 0 15px rgba(50, 82, 123, 0.2);
         }
 
         .sgx-glow { text-shadow: 0 0 10px rgba(253, 204, 13, 0.6); }
@@ -67,42 +68,43 @@
             color: #FDCC0D;
             display: flex; align-items: center; justify-content: center;
             font-size: 1.2rem; cursor: pointer; transition: all 0.1s;
-            clip-path: polygon(15% 0, 85% 0, 100% 15%, 100% 85%, 85% 100%, 15% 100%, 0 85%, 0 15%);
+            clip-path: polygon(20% 0, 80% 0, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0 80%, 0 20%);
         }
         .dpad-btn:active, .dpad-btn.active {
             background: #FDCC0D; color: #010409;
             box-shadow: 0 0 15px #FDCC0D; transform: scale(0.95);
         }
 
-        /* Sliders de Ingeniería */
+        /* Sliders de Ingeniería (Más compactos) */
         input[type=range] {
-            -webkit-appearance: none; width: 100%; background: transparent; margin: 8px 0;
+            -webkit-appearance: none; width: 100%; background: transparent; margin: 4px 0; height: 12px;
         }
         input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none; height: 16px; width: 16px;
+            -webkit-appearance: none; height: 14px; width: 14px;
             border-radius: 50%; background: #FDCC0D; cursor: pointer;
-            margin-top: -6px; box-shadow: 0 0 8px #FDCC0D;
+            margin-top: -5px; box-shadow: 0 0 8px #FDCC0D;
         }
         input[type=range]::-webkit-slider-runnable-track {
             width: 100%; height: 4px; cursor: pointer;
             background: #32527B; border-radius: 2px;
         }
 
-        /* Checkbox Custom */
+        /* Checkbox Custom (Curvo) */
         .sgx-checkbox {
-            appearance: none; width: 20px; height: 20px;
+            appearance: none; width: 16px; height: 16px;
             border: 2px solid #32527B; background: transparent;
-            cursor: pointer; position: relative;
+            cursor: pointer; position: relative; border-radius: 6px;
         }
         .sgx-checkbox:checked { background: #FDCC0D; border-color: #FDCC0D; }
 
-        /* Color Picker Custom */
+        /* Color Picker Custom (Curvo y compacto) */
         input[type="color"] {
             -webkit-appearance: none; border: none; padding: 0;
-            width: 100%; height: 24px; cursor: pointer; background: transparent;
+            width: 100%; height: 20px; cursor: pointer; background: transparent;
+            border-radius: 8px;
         }
         input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
-        input[type="color"]::-webkit-color-swatch { border: 1px solid #32527B; border-radius: 4px; }
+        input[type="color"]::-webkit-color-swatch { border: 1px solid #32527B; border-radius: 8px; }
 
         #ui-layer, #controller-ui, #loading-screen { display: none; z-index: 10; position: relative; }
         
@@ -115,7 +117,7 @@
         /* Scrollbar oculta para paneles */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #32527B; }
+        ::-webkit-scrollbar-thumb { background: #32527B; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -134,73 +136,81 @@
     <!-- ========================================== -->
     <!-- MODO VISUALIZADOR (PANTALLA GIGANTE)       -->
     <!-- ========================================== -->
-    <div id="ui-layer" class="w-full h-screen p-6 flex flex-col justify-between pointer-events-none">
+    <div id="ui-layer" class="w-full h-screen p-4 flex flex-col justify-between pointer-events-none">
         
         <!-- Top Bar -->
         <div class="flex justify-between items-start">
-            <div class="sgx-panel p-4 pr-12 pointer-events-auto flex items-center gap-4">
-                <img src="ICON YW.PNG" alt="SGX" class="w-10 h-10" onerror="this.style.display='none'">
+            <div class="sgx-panel p-3 pr-8 pointer-events-auto flex items-center gap-3">
+                <img src="ICON YW.PNG" alt="SGX" class="w-8 h-8" onerror="this.style.display='none'">
                 <div>
-                    <h1 class="text-3xl font-bold sgx-glow tracking-[0.1em] uppercase">SPATIALGINEERS</h1>
-                    <p class="text-xs tracking-widest text-sgxBlue uppercase font-bold">SGX.Showcase | Módulo XR</p>
+                    <h1 class="text-2xl font-bold sgx-glow tracking-[0.1em] uppercase">SPATIALGINEERS</h1>
+                    <p class="text-[10px] tracking-widest text-sgxBlue uppercase font-bold">SGX.Showcase | Módulo XR</p>
                 </div>
             </div>
-            <div id="connection-status" class="sgx-panel px-6 py-3 text-xs font-bold tracking-widest flex items-center gap-3">
+            <div id="connection-status" class="sgx-panel px-5 py-2 text-[10px] font-bold tracking-widest flex items-center gap-2">
                 <div class="w-2 h-2 rounded-full bg-sgxCopper animate-ping"></div>
                 <span>ESPERANDO TELEMETRÍA...</span>
             </div>
         </div>
 
         <!-- Middle: Paneles Laterales -->
-        <div class="flex justify-between items-center w-full pointer-events-auto flex-grow my-4">
+        <div class="flex justify-between items-center w-full pointer-events-auto flex-grow my-2">
             
-            <!-- Panel de Materiales (Visualizador) -->
-            <div class="sgx-panel p-5 w-64 flex flex-col gap-4">
-                <h3 class="text-sm font-bold tracking-widest text-sgxBlue uppercase mb-2 border-b border-sgxBlue pb-2">Material Override</h3>
+            <!-- Panel de Materiales (Visualizador - Compacto) -->
+            <div class="sgx-panel p-4 w-56 flex flex-col gap-2">
+                <h3 class="text-xs font-bold tracking-widest text-sgxBlue uppercase mb-1 border-b border-sgxBlue pb-1">Material Override</h3>
                 
                 <div>
-                    <div class="flex justify-between text-xs font-bold mb-1"><label>ROUGHNESS</label><span id="val-r">0.2</span></div>
+                    <div class="flex justify-between text-[10px] font-bold mb-1"><label>ROUGHNESS</label><span id="val-r">0.2</span></div>
                     <input type="range" id="sl-roughness" min="0" max="1" step="0.01" value="0.2">
                 </div>
                 <div>
-                    <div class="flex justify-between text-xs font-bold mb-1"><label>METALLIC</label><span id="val-m">0.8</span></div>
+                    <div class="flex justify-between text-[10px] font-bold mb-1"><label>METALLIC</label><span id="val-m">0.8</span></div>
                     <input type="range" id="sl-metallic" min="0" max="1" step="0.01" value="0.8">
                 </div>
                 <div>
-                    <div class="flex justify-between text-xs font-bold mb-1"><label>OPACITY</label><span id="val-o">1.0</span></div>
+                    <div class="flex justify-between text-[10px] font-bold mb-1"><label>OPACITY</label><span id="val-o">1.0</span></div>
                     <input type="range" id="sl-opacity" min="0" max="1" step="0.01" value="1.0">
                 </div>
                 <div>
-                    <div class="flex justify-between text-xs font-bold mb-1"><label>SCALE</label><span id="val-s">1.0x</span></div>
+                    <div class="flex justify-between text-[10px] font-bold mb-1"><label>SCALE</label><span id="val-s">1.0x</span></div>
                     <input type="range" id="sl-scale" min="0.1" max="3" step="0.05" value="1.0">
                 </div>
                 <div>
-                    <div class="flex justify-between text-xs font-bold mb-1"><label>COLOR</label><span id="val-c">#FFFFFF</span></div>
+                    <div class="flex justify-between text-[10px] font-bold mb-1"><label>BASE COLOR</label><span id="val-c">#FFFFFF</span></div>
                     <input type="color" id="in-color" value="#ffffff">
                 </div>
-                <div class="flex items-center justify-between mt-2">
-                    <label class="text-xs font-bold tracking-widest">WIREFRAME</label>
+                <div>
+                    <div class="flex justify-between text-[10px] font-bold mb-1 text-sgxYellow"><label>EMISSION INT.</label><span id="val-ei">0.0</span></div>
+                    <input type="range" id="sl-emission-int" min="0" max="5" step="0.1" value="0.0">
+                </div>
+                <div>
+                    <div class="flex justify-between text-[10px] font-bold mb-1 text-sgxYellow"><label>EMISSION COLOR</label><span id="val-ec">#FDCC0D</span></div>
+                    <input type="color" id="in-emission-color" value="#fdcc0d">
+                </div>
+                <div class="flex items-center justify-between mt-1 bg-sgxBlue bg-opacity-20 p-2 rounded-xl">
+                    <label class="text-[10px] font-bold tracking-widest">WIREFRAME</label>
                     <input type="checkbox" id="cb-wireframe" class="sgx-checkbox">
                 </div>
             </div>
 
             <!-- Panel Derecho (QR y D-Pad) -->
-            <div class="flex flex-col items-end gap-4 h-full justify-end">
+            <div class="flex flex-col items-end gap-3 h-full justify-end">
                 <!-- QR Code -->
-                <div class="sgx-panel p-4 flex flex-col items-center">
-                    <div class="bg-white p-2 rounded mb-3 border border-sgxBlue">
+                <div class="sgx-panel p-3 flex flex-col items-center">
+                    <div class="bg-white p-2 rounded-xl mb-2 border border-sgxBlue">
                         <div id="qrcode"></div>
                     </div>
-                    <p id="qr-instruction" class="font-bold text-xs tracking-widest text-center text-sgxYellow">ESCANEA PARA<br>CONTROL MÓVIL</p>
+                    <p id="qr-instruction" class="font-bold text-[10px] tracking-widest text-center text-sgxYellow">ESCANEA PARA<br>CONTROL MÓVIL</p>
                 </div>
                 
                 <!-- D-Pad Local -->
-                <div class="sgx-panel p-4 flex flex-col items-center">
+                <div class="sgx-panel p-3 flex flex-col items-center">
                     <p class="text-[10px] mb-2 tracking-widest text-sgxBlue font-bold text-center">OVERRIDE ROTACIÓN</p>
-                    <div class="grid grid-cols-3 gap-1 w-28 h-28">
+                    <div class="grid grid-cols-3 gap-1 w-24 h-24">
                         <div></div><button class="dpad-btn" id="vis-btn-up">▲</button><div></div>
                         <button class="dpad-btn" id="vis-btn-left">◀</button>
-                        <button class="dpad-btn text-[10px] font-bold text-sgxBlue hover:text-sgxYellow" id="vis-btn-reset">RST</button>
+                        <button class="dpad-btn text-[10px] font-bold text-sgxBlue hover:text-sgxYellow rounded-lg" id="vis-btn-reset">RST</button>
                         <button class="dpad-btn" id="vis-btn-right">▶</button>
                         <div></div><button class="dpad-btn" id="vis-btn-down">▼</button><div></div>
                     </div>
@@ -209,7 +219,7 @@
         </div>
         
         <!-- Footer -->
-        <div class="text-center pb-2 opacity-50 text-[10px] tracking-[0.2em] pointer-events-none text-sgxBlue">
+        <div class="text-center pb-1 opacity-50 text-[10px] tracking-[0.2em] pointer-events-none text-sgxBlue">
             SPATIALGINEERS LLC &copy; 2026 | ENGINEERING IMAGINATION, BUILDING REALITY
         </div>
     </div>
@@ -219,7 +229,7 @@
     <!-- ========================================== -->
     <div id="controller-ui" class="w-full min-h-screen bg-sgxDark flex flex-col items-center p-4 overflow-y-auto">
         
-        <div class="sgx-panel w-full p-4 flex items-center justify-center gap-3 mb-6 mt-2">
+        <div class="sgx-panel w-full p-4 flex items-center justify-center gap-3 mb-4 mt-2">
             <img src="ICON YW.PNG" alt="SGX" class="w-8 h-8" onerror="this.style.display='none'">
             <div class="text-left">
                 <h2 class="text-xl font-bold sgx-glow tracking-widest uppercase">SGX REMOTE</h2>
@@ -228,19 +238,19 @@
         </div>
         
         <!-- Setup Inicial -->
-        <div id="setup-section" class="flex flex-col items-center justify-center w-full max-w-sm mt-10">
-            <p class="text-center text-sm mb-8 text-gray-400">Selecciona el modo de control espacial.</p>
+        <div id="setup-section" class="flex flex-col items-center justify-center w-full max-w-sm mt-8">
+            <p class="text-center text-sm mb-6 text-gray-400">Selecciona el modo de control espacial.</p>
             
-            <button id="btn-activar" class="w-full bg-sgxYellow text-sgxDark font-bold text-lg py-4 rounded mb-4 hover:scale-105 active:scale-95 transition shadow-[0_0_15px_#FDCC0D]">
+            <button id="btn-activar" class="w-full bg-sgxYellow text-sgxDark font-bold text-base py-4 rounded-2xl mb-3 hover:scale-105 active:scale-95 transition shadow-[0_0_15px_#FDCC0D]">
                 ACTIVAR GIROSCOPIO 3D
             </button>
-            <button id="btn-solo-manual" class="w-full border border-sgxBlue text-sgxBlue font-bold text-sm py-4 rounded active:bg-sgxBlue active:text-white transition">
+            <button id="btn-solo-manual" class="w-full border-2 border-sgxBlue text-sgxBlue font-bold text-sm py-3 rounded-2xl active:bg-sgxBlue active:text-white transition">
                 USAR SOLO BOTONES (D-PAD)
             </button>
         </div>
 
         <!-- Panel de Control Activo -->
-        <div id="active-section" class="hidden flex-col items-center w-full max-w-sm gap-6 pb-10">
+        <div id="active-section" class="hidden flex-col items-center w-full max-w-sm gap-4 pb-8">
             
             <!-- Telemetría Giroscopio (Oculta si es solo manual) -->
             <div id="gyro-telemetry" class="grid grid-cols-3 gap-2 w-full sgx-panel p-3 text-center">
@@ -250,42 +260,50 @@
             </div>
 
             <!-- D-Pad Remoto -->
-            <div class="sgx-panel p-6 rounded-full">
-                <div class="grid grid-cols-3 gap-2 w-48 h-48">
+            <div class="sgx-panel p-5">
+                <div class="grid grid-cols-3 gap-2 w-40 h-40">
                     <div></div><button class="dpad-btn" id="ctrl-btn-up">▲</button><div></div>
                     <button class="dpad-btn" id="ctrl-btn-left">◀</button>
-                    <button class="dpad-btn text-xs font-bold text-sgxBlue" id="ctrl-btn-reset">C</button>
+                    <button class="dpad-btn text-xs font-bold text-sgxBlue rounded-xl" id="ctrl-btn-reset">C</button>
                     <button class="dpad-btn" id="ctrl-btn-right">▶</button>
                     <div></div><button class="dpad-btn" id="ctrl-btn-down">▼</button><div></div>
                 </div>
             </div>
 
-            <!-- Controles de Material Remotos -->
-            <div class="sgx-panel p-5 w-full flex flex-col gap-4">
-                <h3 class="text-sm font-bold tracking-widest text-sgxYellow uppercase mb-2 border-b border-sgxBlue pb-2">Material Override</h3>
+            <!-- Controles de Material Remotos (Compacto) -->
+            <div class="sgx-panel p-4 w-full flex flex-col gap-3">
+                <h3 class="text-xs font-bold tracking-widest text-sgxYellow uppercase mb-1 border-b border-sgxBlue pb-1">Material Override</h3>
                 
                 <div>
-                    <div class="flex justify-between text-xs font-bold mb-1"><label>ROUGHNESS</label><span id="rem-val-r">0.2</span></div>
+                    <div class="flex justify-between text-[10px] font-bold mb-1"><label>ROUGHNESS</label><span id="rem-val-r">0.2</span></div>
                     <input type="range" id="rem-sl-roughness" min="0" max="1" step="0.01" value="0.2">
                 </div>
                 <div>
-                    <div class="flex justify-between text-xs font-bold mb-1"><label>METALLIC</label><span id="rem-val-m">0.8</span></div>
+                    <div class="flex justify-between text-[10px] font-bold mb-1"><label>METALLIC</label><span id="rem-val-m">0.8</span></div>
                     <input type="range" id="rem-sl-metallic" min="0" max="1" step="0.01" value="0.8">
                 </div>
                 <div>
-                    <div class="flex justify-between text-xs font-bold mb-1"><label>OPACITY</label><span id="rem-val-o">1.0</span></div>
+                    <div class="flex justify-between text-[10px] font-bold mb-1"><label>OPACITY</label><span id="rem-val-o">1.0</span></div>
                     <input type="range" id="rem-sl-opacity" min="0" max="1" step="0.01" value="1.0">
                 </div>
                 <div>
-                    <div class="flex justify-between text-xs font-bold mb-1"><label>SCALE</label><span id="rem-val-s">1.0x</span></div>
+                    <div class="flex justify-between text-[10px] font-bold mb-1"><label>SCALE</label><span id="rem-val-s">1.0x</span></div>
                     <input type="range" id="rem-sl-scale" min="0.1" max="3" step="0.05" value="1.0">
                 </div>
                 <div>
-                    <div class="flex justify-between text-xs font-bold mb-1"><label>COLOR</label><span id="rem-val-c">#FFFFFF</span></div>
+                    <div class="flex justify-between text-[10px] font-bold mb-1"><label>BASE COLOR</label><span id="rem-val-c">#FFFFFF</span></div>
                     <input type="color" id="rem-in-color" value="#ffffff">
                 </div>
-                <div class="flex items-center justify-between mt-2 bg-sgxBlue bg-opacity-20 p-2 rounded">
-                    <label class="text-xs font-bold tracking-widest">WIREFRAME</label>
+                <div>
+                    <div class="flex justify-between text-[10px] font-bold mb-1 text-sgxYellow"><label>EMISSION INT.</label><span id="rem-val-ei">0.0</span></div>
+                    <input type="range" id="rem-sl-emission-int" min="0" max="5" step="0.1" value="0.0">
+                </div>
+                <div>
+                    <div class="flex justify-between text-[10px] font-bold mb-1 text-sgxYellow"><label>EMISSION COLOR</label><span id="rem-val-ec">#FDCC0D</span></div>
+                    <input type="color" id="rem-in-emission-color" value="#fdcc0d">
+                </div>
+                <div class="flex items-center justify-between mt-1 bg-sgxBlue bg-opacity-20 p-2 rounded-xl">
+                    <label class="text-[10px] font-bold tracking-widest">WIREFRAME</label>
                     <input type="checkbox" id="rem-cb-wireframe" class="sgx-checkbox">
                 </div>
             </div>
@@ -313,8 +331,8 @@
         let loadedMeshes = [];
         let baseScaleMultiplier = 1; 
         
-        // Material Params (Default SGX Style)
-        let matParams = { r: 0.2, m: 0.8, o: 1.0, s: 1.0, w: false, c: '#ffffff' };
+        // Material Params (Default SGX Style with Emission)
+        let matParams = { r: 0.2, m: 0.8, o: 1.0, s: 1.0, w: false, c: '#ffffff', ei: 0.0, ec: '#fdcc0d' };
 
         // Input State
         let manualMoves = { up: false, down: false, left: false, right: false };
@@ -334,17 +352,15 @@
 
             // --- THREE.JS INIT ---
             const scene = new THREE.Scene();
-            // Mantenemos el fondo oscuro SGX Void
             scene.background = new THREE.Color(0x010409);
             scene.fog = new THREE.FogExp2(0x010409, 0.04);
 
             // --- CARGA DE HDRI / ENVIRONMENT MAP ---
             const textureLoader = new THREE.TextureLoader();
             textureLoader.load(HDRI_URL, function(texture) {
-                // Mapeo esférico para que el modelo refleje el entorno en 360 grados
                 texture.mapping = THREE.EquirectangularReflectionMapping;
-                texture.encoding = THREE.sRGBEncoding; // PBR Correct Color space (r128 compatibility)
-                scene.environment = texture; // Asigna la luz rebotada y los reflejos, pero NO altera el scene.background
+                texture.encoding = THREE.sRGBEncoding; 
+                scene.environment = texture; 
             });
 
             const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -358,14 +374,14 @@
             document.getElementById('canvas-container').appendChild(renderer.domElement);
 
             // --- ILUMINACIÓN SGX BRANDING ---
-            const ambientLight = new THREE.AmbientLight(0x32527B, 0.8); // Azul Metálico
+            const ambientLight = new THREE.AmbientLight(0x32527B, 0.8);
             scene.add(ambientLight);
 
-            const neonLight = new THREE.DirectionalLight(0xFDCC0D, 2); // Amarillo Metálico/Neón
+            const neonLight = new THREE.DirectionalLight(0xFDCC0D, 2);
             neonLight.position.set(5, 8, 5);
             scene.add(neonLight);
 
-            const copperLight = new THREE.PointLight(0xB87333, 3, 20); // Cobre (Ground/Fill)
+            const copperLight = new THREE.PointLight(0xB87333, 3, 20);
             copperLight.position.set(-5, -2, -5);
             scene.add(copperLight);
 
@@ -403,7 +419,7 @@
                 });
 
                 sgxModelGroup.add(model);
-                applyMaterials(); // Aplicar valores UI
+                applyMaterials(); 
                 document.getElementById('loading-screen').style.display = 'none';
 
             }, (xhr) => {
@@ -421,18 +437,24 @@
             const uiS = document.getElementById('sl-scale');
             const uiW = document.getElementById('cb-wireframe');
             const uiC = document.getElementById('in-color');
+            const uiEI = document.getElementById('sl-emission-int');
+            const uiEC = document.getElementById('in-emission-color');
 
             function applyMaterials() {
+                // UI Text Updates
                 document.getElementById('val-r').innerText = matParams.r.toFixed(2);
                 document.getElementById('val-m').innerText = matParams.m.toFixed(2);
                 document.getElementById('val-o').innerText = matParams.o.toFixed(2);
                 document.getElementById('val-s').innerText = matParams.s.toFixed(2) + 'x';
                 document.getElementById('val-c').innerText = matParams.c.toUpperCase();
+                document.getElementById('val-ei').innerText = matParams.ei.toFixed(2);
+                document.getElementById('val-ec').innerText = matParams.ec.toUpperCase();
                 
                 // Actualizar sliders locales
                 uiR.value = matParams.r; uiM.value = matParams.m; 
                 uiO.value = matParams.o; uiS.value = matParams.s;
                 uiW.checked = matParams.w; uiC.value = matParams.c;
+                uiEI.value = matParams.ei; uiEC.value = matParams.ec;
 
                 // Escala global
                 const currentScale = baseScaleMultiplier * matParams.s;
@@ -448,14 +470,15 @@
                         mesh.material.transparent = matParams.o < 1.0;
                         mesh.material.wireframe = matParams.w;
                         
-                        // Añadir emissive sutil si wireframe está activo (look Holográfico)
-                        if(matParams.w) {
-                            mesh.material.emissive = new THREE.Color(0xFDCC0D);
-                            mesh.material.emissiveIntensity = 0.2;
+                        // Control de Emisión
+                        mesh.material.emissive.set(matParams.ec);
+                        // Si está en wireframe y la emisión es 0, damos un brillo por defecto, si no, respeta el override de emisión del usuario
+                        if(matParams.w && matParams.ei === 0) {
+                            mesh.material.emissiveIntensity = 0.2; 
                         } else {
-                            mesh.material.emissiveIntensity = 0;
+                            mesh.material.emissiveIntensity = matParams.ei;
                         }
-                        // Forzar a Three.js a recalcular el material PBR para que coja el Environment Map
+                        
                         mesh.material.needsUpdate = true;
                     }
                 });
@@ -469,13 +492,15 @@
                 matParams.s = parseFloat(uiS.value);
                 matParams.w = uiW.checked;
                 matParams.c = uiC.value;
+                matParams.ei = parseFloat(uiEI.value);
+                matParams.ec = uiEC.value;
+                
                 applyMaterials();
-                // Notificar al control si está conectado (Two-way sync)
                 if(dataConnection && dataConnection.open) {
                     dataConnection.send({ type: 'matSync', params: matParams });
                 }
             };
-            [uiR, uiM, uiO, uiS, uiW, uiC].forEach(el => el.addEventListener('input', handleLocalUI));
+            [uiR, uiM, uiO, uiS, uiW, uiC, uiEI, uiEC].forEach(el => el.addEventListener('input', handleLocalUI));
 
             // --- RENDER LOOP & ROTACIÓN ---
             const ROT_SPEED = 0.05;
@@ -491,7 +516,7 @@
                     sgxModelGroup.rotation.x += (manualRotationOffset.x - sgxModelGroup.rotation.x) * 0.1;
                     sgxModelGroup.rotation.y += (manualRotationOffset.y - sgxModelGroup.rotation.y) * 0.1;
                     if(!manualMoves.up && !manualMoves.down && !manualMoves.left && !manualMoves.right) {
-                        manualRotationOffset.y += 0.003; // Auto-pan lento
+                        manualRotationOffset.y += 0.003; 
                     }
                 } else {
                     let finalX = targetGyroRot.x + manualRotationOffset.x;
@@ -534,7 +559,7 @@
                 const remoteUrl = `${cleanUrl}?modo=controlador&id=${id}`;
                 
                 new QRCode(document.getElementById("qrcode"), {
-                    text: remoteUrl, width: 130, height: 130,
+                    text: remoteUrl, width: 100, height: 100, // Más compacto
                     colorDark : "#32527B", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.L
                 });
             });
@@ -544,10 +569,16 @@
                 statusDisplay.innerHTML = '<div class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_#22c55e]"></div> <span class="text-green-500">ENLACE ACTIVO</span>';
                 document.getElementById('qr-instruction').innerText = "SISTEMA REMOTO CONECTADO";
                 
-                // Enviar estado actual de materiales al celular al conectar
-                conn.on('open', () => {
+                const sendInitialSync = () => {
                     conn.send({ type: 'matSync', params: matParams });
-                });
+                };
+
+                // Forzar envío si la conexión ya estaba abierta al recibir el evento
+                if (conn.open) {
+                    sendInitialSync();
+                } else {
+                    conn.on('open', sendInitialSync);
+                }
 
                 conn.on('data', (data) => {
                     if(data.type === 'orientation') {
@@ -557,16 +588,9 @@
                         targetGyroRot.y = data.gamma * d2r; 
                         targetGyroRot.z = data.alpha * d2r; 
                     }
-                    else if (data.type === 'pad') {
-                        manualMoves[data.dir] = data.active;
-                    }
-                    else if (data.type === 'reset') {
-                        manualRotationOffset = {x: 0, y: 0}; targetGyroRot.set(0,0,0);
-                    }
-                    else if (data.type === 'matUpdate') {
-                        matParams = data.params;
-                        applyMaterials();
-                    }
+                    else if (data.type === 'pad') { manualMoves[data.dir] = data.active; }
+                    else if (data.type === 'reset') { manualRotationOffset = {x: 0, y: 0}; targetGyroRot.set(0,0,0); }
+                    else if (data.type === 'matUpdate') { matParams = data.params; applyMaterials(); }
                 });
 
                 conn.on('close', () => {
@@ -597,8 +621,14 @@
                 btnSoloManual.disabled = true;
                 if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
                     DeviceOrientationEvent.requestPermission()
-                        .then(state => { state === 'granted' ? initRemote(true) : initRemote(false); })
-                        .catch(err => initRemote(false));
+                        .then(state => { 
+                            if (state === 'granted') { initRemote(true); } 
+                            else { alert("Permiso denegado. Se iniciará en modo manual."); initRemote(false); }
+                        })
+                        .catch(err => { 
+                            console.error(err);
+                            initRemote(false); // Fallback automático si falla el request
+                        });
                 } else { initRemote(true); }
             });
             
@@ -615,47 +645,66 @@
                 btnSoloManual.innerText = "CONECTANDO AL HOST...";
                 
                 peer = new Peer({ debug: 1 });
+                let isConnected = false;
                 
-                // Timeout de seguridad por si el Wi-Fi bloquea la conexión P2P
                 let connectionTimeout = setTimeout(() => {
-                    if (!dataConnection || !dataConnection.open) {
-                        alert("La conexión está tardando demasiado. Por favor, recarga la página o intenta usar datos móviles (LTE/5G).");
+                    if (!isConnected) {
+                        alert("La conexión está tardando demasiado. Asegúrate de tener buena señal o usa datos móviles.");
                         btnActivar.innerText = "ACTIVAR GIROSCOPIO 3D";
                         btnSoloManual.innerText = "USAR SOLO BOTONES (D-PAD)";
                         btnActivar.disabled = false;
                         btnSoloManual.disabled = false;
+                        statusText.innerText = "ERROR DE CONEXIÓN";
                     }
                 }, 10000);
 
+                const onConnectionEstablished = () => {
+                    if (isConnected) return; // Evitar doble ejecución
+                    isConnected = true;
+                    clearTimeout(connectionTimeout); 
+                    
+                    setupSec.style.display = 'none'; 
+                    activeSec.style.display = 'flex';
+                    statusText.innerText = "SISTEMA EN LÍNEA"; 
+                    statusText.classList.add('text-green-500');
+                    
+                    if(useGyro) {
+                        window.addEventListener('deviceorientation', (e) => {
+                            let a = (e.alpha||0)-offsetAlpha, b = (e.beta||0)-offsetBeta, c = (e.gamma||0)-offsetGamma;
+                            lastOri = { a:e.alpha||0, b:e.beta||0, c:e.gamma||0 };
+                            document.getElementById('val-x').innerText = b.toFixed(0);
+                            document.getElementById('val-y').innerText = c.toFixed(0);
+                            document.getElementById('val-z').innerText = a.toFixed(0);
+                            if (dataConnection && dataConnection.open) {
+                                dataConnection.send({ type: 'orientation', alpha: a, beta: b, gamma: c });
+                            }
+                        });
+                    } else {
+                        document.getElementById('gyro-telemetry').style.display = 'none';
+                    }
+                };
+
                 peer.on('open', () => {
-                    // Eliminamos reliable: false para evitar bloqueos del Data Channel en iOS
                     dataConnection = peer.connect(hostId);
                     
-                    dataConnection.on('open', () => {
-                        clearTimeout(connectionTimeout); // Cancelar el timeout de error
-                        setupSec.style.display = 'none'; activeSec.style.display = 'flex';
-                        statusText.innerText = "SISTEMA EN LÍNEA"; statusText.classList.add('text-green-500');
-                        
-                        if(useGyro) {
-                            window.addEventListener('deviceorientation', (e) => {
-                                let a = (e.alpha||0)-offsetAlpha, b = (e.beta||0)-offsetBeta, c = (e.gamma||0)-offsetGamma;
-                                lastOri = { a:e.alpha||0, b:e.beta||0, c:e.gamma||0 };
-                                document.getElementById('val-x').innerText = b.toFixed(0);
-                                document.getElementById('val-y').innerText = c.toFixed(0);
-                                document.getElementById('val-z').innerText = a.toFixed(0);
-                                if (dataConnection.open) dataConnection.send({ type: 'orientation', alpha: a, beta: b, gamma: c });
-                            });
-                        } else {
-                            document.getElementById('gyro-telemetry').style.display = 'none';
-                        }
-                    });
+                    dataConnection.on('open', onConnectionEstablished);
                     
-                    // Recibir sincronización de materiales del host
                     dataConnection.on('data', (data) => {
-                        if(data.type === 'matSync') {
-                            syncRemoteUI(data.params);
-                        }
+                        // Doble Check: Si llega data de sincronización del host, forzar transición
+                        onConnectionEstablished();
+                        
+                        if(data.type === 'matSync') { syncRemoteUI(data.params); }
                     });
+                });
+                
+                peer.on('error', (err) => {
+                    console.error("PeerJS Error:", err);
+                    if (!isConnected) {
+                        clearTimeout(connectionTimeout);
+                        alert("Fallo de red P2P. Intenta de nuevo.");
+                        btnActivar.disabled = false; btnSoloManual.disabled = false;
+                        btnActivar.innerText = "REINTENTAR"; btnSoloManual.innerText = "REINTENTAR";
+                    }
                 });
             }
 
@@ -668,7 +717,6 @@
                 };
                 b.addEventListener('touchstart', (e)=>{e.preventDefault(); s(true);});
                 b.addEventListener('touchend', (e)=>{e.preventDefault(); s(false);});
-                // Soporte para PC/Mouse
                 b.addEventListener('mousedown', (e)=>{e.preventDefault(); s(true);});
                 b.addEventListener('mouseup', (e)=>{e.preventDefault(); s(false);});
                 b.addEventListener('mouseleave', (e)=>{e.preventDefault(); s(false);});
@@ -689,26 +737,36 @@
                 o: document.getElementById('rem-sl-opacity'),
                 s: document.getElementById('rem-sl-scale'),
                 w: document.getElementById('rem-cb-wireframe'),
-                c: document.getElementById('rem-in-color')
+                c: document.getElementById('rem-in-color'),
+                ei: document.getElementById('rem-sl-emission-int'),
+                ec: document.getElementById('rem-in-emission-color')
             };
-            const rVal = { r: 'rem-val-r', m: 'rem-val-m', o: 'rem-val-o', s: 'rem-val-s', c: 'rem-val-c' };
+            const rVal = { 
+                r: 'rem-val-r', m: 'rem-val-m', o: 'rem-val-o', s: 'rem-val-s', 
+                c: 'rem-val-c', ei: 'rem-val-ei', ec: 'rem-val-ec' 
+            };
 
             function syncRemoteUI(p) {
-                rUI.r.value = p.r; rUI.m.value = p.m; rUI.o.value = p.o; rUI.s.value = p.s; rUI.w.checked = p.w; rUI.c.value = p.c;
+                rUI.r.value = p.r; rUI.m.value = p.m; rUI.o.value = p.o; rUI.s.value = p.s; 
+                rUI.w.checked = p.w; rUI.c.value = p.c; rUI.ei.value = p.ei; rUI.ec.value = p.ec;
+                
                 document.getElementById(rVal.r).innerText = p.r.toFixed(2);
                 document.getElementById(rVal.m).innerText = p.m.toFixed(2);
                 document.getElementById(rVal.o).innerText = p.o.toFixed(2);
                 document.getElementById(rVal.s).innerText = p.s.toFixed(2) + 'x';
                 document.getElementById(rVal.c).innerText = p.c.toUpperCase();
+                document.getElementById(rVal.ei).innerText = p.ei.toFixed(2);
+                document.getElementById(rVal.ec).innerText = p.ec.toUpperCase();
             }
 
             const sendMatUpdate = () => {
                 const p = {
                     r: parseFloat(rUI.r.value), m: parseFloat(rUI.m.value),
                     o: parseFloat(rUI.o.value), s: parseFloat(rUI.s.value), 
-                    w: rUI.w.checked, c: rUI.c.value
+                    w: rUI.w.checked, c: rUI.c.value, 
+                    ei: parseFloat(rUI.ei.value), ec: rUI.ec.value
                 };
-                syncRemoteUI(p); // Update text locally
+                syncRemoteUI(p); 
                 if(dataConnection && dataConnection.open) {
                     dataConnection.send({ type: 'matUpdate', params: p });
                 }
