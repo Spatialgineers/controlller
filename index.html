@@ -322,6 +322,18 @@
         const MODEL_URL = 'https://static.wixstatic.com/3d/fe81a7_cf1ed4e58d0048efa955f39d347a9466.glb';
         const HDRI_URL = 'https://static.wixstatic.com/media/fe81a7_c9b56435fd4b4430ba78aa2c64492965~mv2.jpeg';
 
+        // P2P Configuración Robusta con STUN Servers para evitar bloqueos de NAT
+        const peerConfig = {
+            debug: 1,
+            config: {
+                'iceServers': [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    { urls: 'stun:stun2.l.google.com:19302' }
+                ]
+            }
+        };
+
         // P2P State
         let peer = null;
         let dataConnection = null;
@@ -550,7 +562,7 @@
             document.getElementById('vis-btn-reset').addEventListener('click', () => { manualRotationOffset = {x:0, y:0}; });
 
             // --- PEERJS HOST ---
-            peer = new Peer({ debug: 1 }); 
+            peer = new Peer(peerConfig); 
             const statusDisplay = document.getElementById('connection-status');
             
             peer.on('open', (id) => {
@@ -566,22 +578,21 @@
 
             peer.on('connection', (conn) => {
                 dataConnection = conn;
-                statusDisplay.innerHTML = '<div class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_#22c55e]"></div> <span class="text-green-500">ENLACE ACTIVO</span>';
-                document.getElementById('qr-instruction').innerText = "SISTEMA REMOTO CONECTADO";
+                statusDisplay.innerHTML = '<div class="w-2 h-2 rounded-full bg-sgxYellow animate-pulse"></div> <span class="text-sgxYellow">NEGOCIANDO P2P...</span>';
                 
-                const sendInitialSync = () => {
-                    conn.send({ type: 'matSync', params: matParams });
-                };
-
-                // Forzar envío si la conexión ya estaba abierta al recibir el evento
-                if (conn.open) {
-                    sendInitialSync();
-                } else {
-                    conn.on('open', sendInitialSync);
-                }
+                conn.on('open', () => {
+                    statusDisplay.innerHTML = '<div class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_#22c55e]"></div> <span class="text-green-500">ENLACE ACTIVO</span>';
+                    document.getElementById('qr-instruction').innerText = "SISTEMA REMOTO CONECTADO";
+                });
 
                 conn.on('data', (data) => {
-                    if(data.type === 'orientation') {
+                    // Protocolo Handshake: El celular avisa que ya puede recibir data
+                    if (data.type === 'remoteReady') {
+                        statusDisplay.innerHTML = '<div class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_#22c55e]"></div> <span class="text-green-500">ENLACE ACTIVO</span>';
+                        document.getElementById('qr-instruction').innerText = "SISTEMA REMOTO CONECTADO";
+                        conn.send({ type: 'matSync', params: matParams });
+                    }
+                    else if(data.type === 'orientation') {
                         usingGyro = true;
                         const d2r = Math.PI / 180;
                         targetGyroRot.x = data.beta * d2r; 
@@ -644,24 +655,30 @@
                 btnActivar.innerText = "CONECTANDO AL HOST...";
                 btnSoloManual.innerText = "CONECTANDO AL HOST...";
                 
-                peer = new Peer({ debug: 1 });
+                peer = new Peer(peerConfig);
                 let isConnected = false;
                 
+                // Timeout de 15 segundos para dar tiempo a la red celular de recolectar ICE candidates
                 let connectionTimeout = setTimeout(() => {
                     if (!isConnected) {
-                        alert("La conexión está tardando demasiado. Asegúrate de tener buena señal o usa datos móviles.");
+                        alert("La conexión P2P está tardando demasiado. Verifica tu conexión a internet o intenta usar datos móviles (LTE/5G).");
                         btnActivar.innerText = "ACTIVAR GIROSCOPIO 3D";
                         btnSoloManual.innerText = "USAR SOLO BOTONES (D-PAD)";
                         btnActivar.disabled = false;
                         btnSoloManual.disabled = false;
                         statusText.innerText = "ERROR DE CONEXIÓN";
                     }
-                }, 10000);
+                }, 15000);
 
                 const onConnectionEstablished = () => {
                     if (isConnected) return; // Evitar doble ejecución
                     isConnected = true;
                     clearTimeout(connectionTimeout); 
+                    
+                    // Handshake Protocol: El celular le dice a la pantalla "Ya estoy escuchando, envíame los materiales"
+                    if (dataConnection && dataConnection.open) {
+                        dataConnection.send({ type: 'remoteReady' });
+                    }
                     
                     setupSec.style.display = 'none'; 
                     activeSec.style.display = 'flex';
@@ -685,12 +702,13 @@
                 };
 
                 peer.on('open', () => {
-                    dataConnection = peer.connect(hostId);
+                    // Forzar canal confiable para atravesar firewalls
+                    dataConnection = peer.connect(hostId, { reliable: true });
                     
                     dataConnection.on('open', onConnectionEstablished);
                     
                     dataConnection.on('data', (data) => {
-                        // Doble Check: Si llega data de sincronización del host, forzar transición
+                        // Doble Check por si el evento 'open' falla o llega tarde
                         onConnectionEstablished();
                         
                         if(data.type === 'matSync') { syncRemoteUI(data.params); }
@@ -701,9 +719,10 @@
                     console.error("PeerJS Error:", err);
                     if (!isConnected) {
                         clearTimeout(connectionTimeout);
-                        alert("Fallo de red P2P. Intenta de nuevo.");
+                        alert("Fallo de red P2P. El Firewall puede estar bloqueando la conexión.");
                         btnActivar.disabled = false; btnSoloManual.disabled = false;
                         btnActivar.innerText = "REINTENTAR"; btnSoloManual.innerText = "REINTENTAR";
+                        statusText.innerText = "ERROR DE CONEXIÓN";
                     }
                 });
             }
